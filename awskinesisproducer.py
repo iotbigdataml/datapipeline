@@ -3,9 +3,18 @@ import os, json
 import csv
 import datetime
 import logging
+import configparser
 
-os.environ["AWS_ACCESS_KEY_ID"] = "AKIA5EE3PFKRTG7JU3U4"
-os.environ["AWS_SECRET_ACCESS_KEY"] = "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"
+configParser = configparser.RawConfigParser()   
+configFilePath = r'config.ini'
+configParser.read(configFilePath)
+
+region = configParser.get('kinesis', 'region_name')
+access_key = configParser.get('kinesis', 'aws_access_key_id')
+secret_key = configParser.get('kinesis', 'aws_secret_access_key')
+
+os.environ["AWS_ACCESS_KEY_ID"] = access_key
+os.environ["AWS_SECRET_ACCESS_KEY"] = secret_key
 
 my_stream_name = 'iot_eval8_kds_team2'
 logging.warning("Connecting to data stream : " + my_stream_name + "..")
@@ -13,8 +22,8 @@ logging.warning("Connecting to data stream : " + my_stream_name + "..")
 class KProducer(object):
 
     def __init__(self):
-        self.kinesis_client = boto3.client('kinesis', region_name='us-east-2')
-        self.response = kinesis_client.describe_stream(StreamName=my_stream_name)
+        self.kinesis_client = boto3.client('kinesis', region_name=region)
+        self.response = self.kinesis_client.describe_stream(StreamName=my_stream_name)
         logging.warning("Kinesis Client : " + str(self.kinesis_client))
 
     def put_orders_to_stream(self, orderid, order, property_timestamp):
